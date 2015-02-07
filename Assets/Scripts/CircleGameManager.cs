@@ -33,7 +33,7 @@ public class CircleGameManager : MonoBehaviour {
 
 	void ResetGameState() {
 		consecutiveMissCount = 0;
-		startButton.SetBool("Normal", true);
+		startButton.SetTrigger("Reset");
 		CircleManager.ResetCircles();
 	}
 
