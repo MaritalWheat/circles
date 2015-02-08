@@ -9,8 +9,7 @@ public class CircleManager : MonoBehaviour {
 
 	public GameObject circle;
 	public GameObject scoreOne;
-
-	public int circleCount;
+	
 	public List<Color> colors;
 	public List<Color> complementaryColors;
 	public GameState currentGameState;
@@ -42,7 +41,6 @@ public class CircleManager : MonoBehaviour {
 	}
 
 	public void BeginRound() {
-		circleCount = 0;
 		currentGameState = GameState.Normal;
 		SpawnCircle();
 		StartCoroutine(DifficultyChangeTimer(timeToNextDifficulty));
@@ -56,8 +54,6 @@ public class CircleManager : MonoBehaviour {
 		spawnPosition.y = Random.Range(0, Screen.height);
 		GameObject circleObj = Instantiate (circle, Camera.main.ScreenToWorldPoint(new Vector3(spawnPosition.x, spawnPosition.y, 10)), Quaternion.identity) as GameObject;
 		liveCircle.Add (circleObj);
-		circleCount++;
-		Debug.Log(circleCount);
 		spawnLock = true;
 		StartCoroutine(LockTimer(0.1f));
 	}
@@ -73,7 +69,6 @@ public class CircleManager : MonoBehaviour {
 			GameObject circleObj = Instantiate (circle, Camera.main.ScreenToWorldPoint(new Vector3(spawnPosition.x, spawnPosition.y, 10)), Quaternion.identity) as GameObject;
 			circles.Add(circleObj.GetComponent<CircleBehaviour>());
 			liveCircle.Add (circleObj);
-			circleCount++;
 		}
 		CircleBehaviour circleOne = circles[0];
 		CircleBehaviour circleTwo = circles[1];
@@ -83,21 +78,17 @@ public class CircleManager : MonoBehaviour {
 
 		spawnLock = true;
 		StartCoroutine(LockTimer(0.1f));
-		Debug.Log (circleCount);
 	}
 
 	void StartNextRound() {
-		Debug.Log (circleCount);
 		if (CircleGameManager.Instance.currGameState == CircleGameManager.GameState.Stopped) return;
-		if (circleCount < 1) {
-			int roll = Random.Range(0, 10);
-			if (roll < 5) {
-				currentGameState = GameState.Normal;
-				SpawnCircle();
-			} else if (roll >= 5) {
-				currentGameState = GameState.DoubleRound;
-				SpawnDoubleCircle();
-			}
+		int roll = Random.Range(0, 10);
+		if (roll < 5) {
+			currentGameState = GameState.Normal;
+			SpawnCircle();
+		} else if (roll >= 5) {
+			currentGameState = GameState.DoubleRound;
+			SpawnDoubleCircle();
 		}
 	}
 
@@ -109,7 +100,6 @@ public class CircleManager : MonoBehaviour {
 		}
 		liveCircle.Remove(toKill);
 		Destroy(toKill);
-		circleCount--;
 		if (liveCircle.Count == 0) roundInProgress = false;
 		StartNextRound();
 	}
