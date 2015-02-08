@@ -46,21 +46,21 @@ public class CircleBehaviour : MonoBehaviour {
 	}
 
 	public void OnClick(float time, float expansionTimeFactor) {
-		if (clicked) return;
+		if (fading || clicked) return;
 		clicked = true;
 		AudioManager.Instance.PlaySuccessClip();
 		StartCoroutine(ClickAnimationExpansion(time, expansionTimeFactor));
 	}
 
 	public void OnMultiTouch(float time, float expansionTimeFactor, bool secondTouch) {
-		if (clicked) return;
+		if (fading || clicked) return;
 		clicked = true;
 		AudioManager.Instance.PlaySuccessfulMultitouchClip(secondTouch);
 		StartCoroutine(ClickAnimationExpansion(time, expansionTimeFactor));
 	}
 
 	public void LifetimeComplete(float time) {
-		if (fading) return;
+		if (fading || clicked) return;
 		fading = true;
 		AudioManager.Instance.PlayMissedClip(this);
 		StartCoroutine(OnLifetimeComplete(time));

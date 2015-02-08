@@ -16,8 +16,10 @@ public class CircleManager : MonoBehaviour {
 	public GameState currentGameState;
 
 	private bool spawnLock;
+	private bool roundInProgress;
 	public float circleLifetime = 2.0f;
 	private float timeToNextDifficulty = 5.0f;
+	private List<GameObject> liveCircle = new List<GameObject>();
 
 	public enum GameState {
 		Normal,
@@ -47,18 +49,22 @@ public class CircleManager : MonoBehaviour {
 	}
 
 	void SpawnCircle() {
-		if (spawnLock) return;
+		if (spawnLock || roundInProgress) return;
+		roundInProgress = true;
 		Vector3 spawnPosition = Vector3.zero;
 		spawnPosition.x = Random.Range(0, Screen.width);
 		spawnPosition.y = Random.Range(0, Screen.height);
-		Instantiate (circle, Camera.main.ScreenToWorldPoint(new Vector3(spawnPosition.x, spawnPosition.y, 10)), Quaternion.identity);
+		GameObject circleObj = Instantiate (circle, Camera.main.ScreenToWorldPoint(new Vector3(spawnPosition.x, spawnPosition.y, 10)), Quaternion.identity) as GameObject;
+		liveCircle.Add (circleObj);
 		circleCount++;
+		Debug.Log(circleCount);
 		spawnLock = true;
 		StartCoroutine(LockTimer(0.1f));
 	}
 
 	void SpawnDoubleCircle() {
-		if (spawnLock) return;
+		if (spawnLock || roundInProgress) return;
+		roundInProgress = true;
 		List<CircleBehaviour> circles = new List<CircleBehaviour>();
 		for (int i = 0; i < 2; i++) {
 			Vector3 spawnPosition = Vector3.zero;
@@ -66,6 +72,7 @@ public class CircleManager : MonoBehaviour {
 			spawnPosition.y = Random.Range(0, Screen.height);
 			GameObject circleObj = Instantiate (circle, Camera.main.ScreenToWorldPoint(new Vector3(spawnPosition.x, spawnPosition.y, 10)), Quaternion.identity) as GameObject;
 			circles.Add(circleObj.GetComponent<CircleBehaviour>());
+			liveCircle.Add (circleObj);
 			circleCount++;
 		}
 		CircleBehaviour circleOne = circles[0];
@@ -76,9 +83,11 @@ public class CircleManager : MonoBehaviour {
 
 		spawnLock = true;
 		StartCoroutine(LockTimer(0.1f));
+		Debug.Log (circleCount);
 	}
 
 	void StartNextRound() {
+		Debug.Log (circleCount);
 		if (CircleGameManager.Instance.currGameState == CircleGameManager.GameState.Stopped) return;
 		if (circleCount < 1) {
 			int roll = Random.Range(0, 10);
@@ -98,8 +107,10 @@ public class CircleManager : MonoBehaviour {
 			GameObject scoreUI = GameObject.Instantiate(scoreOne, toKill.transform.position, Quaternion.identity) as GameObject;
 			scoreUI.GetComponent<ScoreMarker>().Initialize(toKill.gameObject.GetComponent<CircleBehaviour>().currColor);
 		}
+		liveCircle.Remove(toKill);
 		Destroy(toKill);
 		circleCount--;
+		if (liveCircle.Count == 0) roundInProgress = false;
 		StartNextRound();
 	}
 
